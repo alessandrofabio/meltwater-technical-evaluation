@@ -1,0 +1,14 @@
+{
+  "name": "meltwater-technical-evaluation",
+  "version": "1.0.0",
+  "description": "Programming excercise",
+  "license": "ISC",
+  "author": "alessandrofabio",
+  "type": "module",
+  "main": "dist/app.js",
+  "scripts": {},
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "typescript": "^6.0.3"
+  }
+}
