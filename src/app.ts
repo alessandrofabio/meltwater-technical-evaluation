@@ -1,34 +1,40 @@
 import * as http from 'node:http';
-import { parseKeywords, redact } from './utils.js';
+import { getRequestBody, parseKeywords, redact, unredact } from './utils.js';
 
 const hostname = '127.0.0.1';
 const port = 3000;
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   if (req.method === 'POST') {
     if (req.url === '/redact') {
-      let body = "";
+      try {
+        const body = await getRequestBody(req);
+        const { keywords, text } = JSON.parse(body);
 
-      req.setEncoding('utf8');
+        const parsedKeywords = parseKeywords(keywords);
+        const { redactedText, key } = redact(parsedKeywords, text);
 
-      req.on('data', (chunk) => {
-        body += chunk;
-      });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ redactedText, key }));
+      } catch (er) {
+        res.statusCode = 400;
+        return res.end(`error: `);
+      }
+    }
 
-      req.on('end', () => {
-        try {
-          const { keywords, text } = JSON.parse(body);
-          
-          const parsedKeywords = parseKeywords(keywords);
-          const redactedText = redact(parsedKeywords, text);
+    if (req.url === '/unredact') {
+      try {
+        const body = await getRequestBody(req);
+        const { key, text } = JSON.parse(body);
 
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(redactedText));
-        } catch (er) {
-          res.statusCode = 400;
-          return res.end(`error: `);
-        }
-      });
+        const originalText = unredact(key, text);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(originalText));
+      } catch (er) {
+        res.statusCode = 400;
+        return res.end(`error: `);
+      }
     }
   }
 });
