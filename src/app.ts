@@ -1,46 +1,37 @@
 import * as http from 'node:http';
 import { parseCensored, redact } from './utils.js';
-import type { CensoredDocument } from './types.js';
 
-const PORT = 8000;
+const hostname = '127.0.0.1';
+const port = 3000;
 
-http
-  .createServer(async (req, res) => {
-    if (req.method === 'POST') {
-      if (req.url === '/redact') {
+const server = http.createServer((req, res) => {
+  if (req.method === 'POST') {
+    if (req.url === '/redact') {
+      let body = "";
+
+      req.setEncoding('utf8');
+
+      req.on('data', (chunk) => {
+        body += chunk;
+      });
+
+      req.on('end', () => {
         try {
-          let body = "";
+          const { censored, text } = JSON.parse(body);
+          const parsedCensored = parseCensored(censored);
+          const redacted = redact(parsedCensored, text);
 
-          req.setEncoding('utf8');
-
-          req.on('data', (chunk) => {
-            body += chunk;
-          });
-
-          req.on('end', () => {
-            try {
-              const { censored, text }: CensoredDocument = JSON.parse(body);
-              const parsedCensored: string [] = parseCensored(censored);
-              const redacted: string = redact(parsedCensored, text);
-
-              res.writeHead(200, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify(redacted));
-            } catch (er) {
-              res.statusCode = 400;
-
-              return res.end('Error');
-            }
-          });
-        } catch {
-
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(redacted));
+        } catch (er) {
+          res.statusCode = 400;
+          return res.end(`error: `);
         }
-      }
-      
-      // if (req.url === '/unredact') {
-
-      // }
+      });
     }
-  })
-  .listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  }
+});
+  
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
