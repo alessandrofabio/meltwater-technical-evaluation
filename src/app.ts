@@ -1,5 +1,5 @@
 import * as http from 'node:http';
-import { parseCensored, redact } from './utils.js';
+import { parseKeywords, redact } from './utils.js';
 
 const hostname = '127.0.0.1';
 const port = 3000;
@@ -17,12 +17,13 @@ const server = http.createServer((req, res) => {
 
       req.on('end', () => {
         try {
-          const { censored, text } = JSON.parse(body);
-          const parsedCensored = parseCensored(censored);
-          const redacted = redact(parsedCensored, text);
+          const { keywords, text } = JSON.parse(body);
+          
+          const parsedKeywords = parseKeywords(keywords);
+          const redactedText = redact(parsedKeywords, text);
 
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(redacted));
+          res.end(JSON.stringify(redactedText));
         } catch (er) {
           res.statusCode = 400;
           return res.end(`error: `);

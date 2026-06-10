@@ -1,16 +1,16 @@
-export function parseCensored(content: string): string[] {
+export function parseKeywords(keywords: string): string[] {
   return Array.from(
-    content.matchAll(/"([^"]*)"|'([^']*)'|[^\s,]+/g), 
+    keywords.matchAll(/"([^"]*)"|'([^']*)'|[^\s,]+/g), 
     (match) => match[1] ?? match[2] ?? match[0]
   );
 }
 
-export function redact(censored: string[], text: string): string {
-  const escapedCensored = censored
-    .toSorted((a, b) => b.length - a.length)
-    .map((term) => RegExp.escape(term));
-  const censorRegExp = new RegExp(escapedCensored.join('|'), 'gi');
-  const redacted = text.replace(censorRegExp, (match: string) => match.replace(/\S/g, 'X'));
+export function redact(parsedKeywords: string[], text: string): string {
+  const escapedParsedKeywords = parsedKeywords
+    .sort((a, b) => b.length - a.length)
+    .map(RegExp.escape);
+  const keywordsToMatch = new RegExp(escapedParsedKeywords.join('|'), 'gi');
+  const redactedText = text.replace(keywordsToMatch, (match) => match.replace(/\S/g, 'X'));
 
-  return redacted;
+  return redactedText;
 }
