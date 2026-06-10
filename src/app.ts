@@ -17,8 +17,10 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ redactedText, key }));
       } catch (er) {
+        const message = er instanceof Error ? er.message : 'Invalid request';
+        
         res.statusCode = 400;
-        return res.end(`error: `);
+        return res.end(`Error: ${message}`);
       }
     }
 
@@ -32,8 +34,10 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(originalText));
       } catch (er) {
+        const message = er instanceof Error ? er.message : 'Invalid request';
+        
         res.statusCode = 400;
-        return res.end(`error: `);
+        return res.end(`Error: ${message}`);
       }
     }
   }

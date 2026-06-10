@@ -15,8 +15,8 @@ export function getRequestBody(req: http.IncomingMessage): Promise<string> {
       resolve(body);
     });
 
-    req.on('error', (err) => {
-      reject(err);
+    req.on('error', (e) => {
+      reject(e);
     });
   });
 }
