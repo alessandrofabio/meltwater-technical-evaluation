@@ -51,7 +51,7 @@ export function unredact(key: string, text: string) {
   let originalText = text;
 
   for (const { at, keyword } of indexedRedactedKeywords) {
-    originalText = originalText.slice(0, at) + keyword + originalText.slice(at);
+    originalText = originalText.slice(0, at) + keyword + originalText.slice(at + keyword.length);
   }
 
   return originalText;
